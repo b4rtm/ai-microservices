@@ -1,0 +1,57 @@
+networks:
+  microservices-net:
+    driver: bridge
+
+services:
+  # ── Spam Detection Service (FastAPI + scikit-learn) ────────────────────────
+  spam-detection-service:
+    build:
+      context: ./spam-fast-api
+    ports:
+      - "8000:8000"
+    networks:
+      - microservices-net
+    healthcheck:
+      # Uses Python stdlib so no curl/wget needed in the slim image
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:8000/health'')"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  # ── API Gateway (Spring Boot / Spring Cloud Gateway) ──────────────────────
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPAM_SERVICE_URL=http://spam-detection-service:8000
+    depends_on:
+      spam-detection-service:
+        condition: service_healthy
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  # ── Future services ────────────────────────────────────────────────────────
+  # user-service:
+  #   build:
+  #     context: ./user-service
+  #   ports:
+  #     - "8001:8001"
+  #   networks:
+  #     - microservices-net
+
+  # history-service:
+  #   build:
+  #     context: ./history-service
+  #   ports:
+  #     - "8002:8002"
+  #   networks:
+  #     - microservices-net
