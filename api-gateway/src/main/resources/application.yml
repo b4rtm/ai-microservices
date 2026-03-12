@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # ── Spam Detection Service ─────────────────────────────────────────────
+        #   /spam/predict  →  http://spam-detection-service:8000/predict
+        #   /spam/health   →  http://spam-detection-service:8000/health
+        - id: spam-detection-service
+          uri: ${SPAM_SERVICE_URL:http://spam-detection-service:8000}
+          predicates:
+            - Path=/spam/**
+          filters:
+            - StripPrefix=1
+
+        # ── Future: User Service ───────────────────────────────────────────────
+        # - id: user-service
+        #   uri: ${USER_SERVICE_URL:http://user-service:8001}
+        #   predicates:
+        #     - Path=/users/**
+        #   filters:
+        #     - StripPrefix=1
+
+        # ── Future: History Service ────────────────────────────────────────────
+        # - id: history-service
+        #   uri: ${HISTORY_SERVICE_URL:http://history-service:8002}
+        #   predicates:
+        #     - Path=/history/**
+        #   filters:
+        #     - StripPrefix=1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
