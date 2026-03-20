@@ -1,0 +1,32 @@
+<button type="button" class="history-toggle-btn btn btn-dark rounded-pill" (click)="open()">
+  Message history
+</button>
+
+<div class="history-overlay" [class.history-overlay--visible]="isOpen" (click)="close()"></div>
+
+<aside class="history-drawer" [class.history-drawer--open]="isOpen" aria-label="Message history panel">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <p class="mb-1 text-uppercase history-label">Recent checks</p>
+      <h2 class="h5 fw-semibold text-white mb-0">Message history</h2>
+    </div>
+    <button type="button" class="btn btn-sm btn-outline-light rounded-circle history-close" (click)="close()" aria-label="Close history panel">
+      x
+    </button>
+  </div>
+
+  <div class="d-grid gap-2">
+    @for (item of history; track item.id) {
+      <article class="history-item rounded-3 p-3">
+        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+          <span class="history-badge" [class.history-badge--spam]="item.status === 'spam'" [class.history-badge--safe]="item.status === 'safe'">
+            {{ item.status === 'spam' ? 'Spam' : 'Not spam' }}
+          </span>
+          <small class="text-slate-300">{{ item.checkedAt }}</small>
+        </div>
+        <p class="mb-1 history-preview">{{ item.preview }}</p>
+        <small class="text-slate-300">Confidence: {{ item.confidence }}%</small>
+      </article>
+    }
+  </div>
+</aside>

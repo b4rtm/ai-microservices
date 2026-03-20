@@ -1,0 +1,35 @@
+<app-message-history [history]="messageHistory" />
+
+<section class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+  <div class="glass-panel rounded-4 p-4 p-md-5 w-100 max-w-3xl">
+    <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap mb-4">
+      <div>
+        <p class="text-uppercase text-xs tracking-[0.28em] text-slate-300 mb-2">SpamShield Console</p>
+        <h1 class="display-6 fw-bold text-white mb-1">Spam Text Checker</h1>
+        <p class="text-slate-300 mb-0">Paste any message and estimate if it looks like spam.</p>
+      </div>
+      <a routerLink="/login" class="btn btn-outline-light rounded-3 px-4 py-2">Sign out</a>
+    </div>
+
+    <div class="mb-3">
+      <label for="messageInput" class="form-label text-slate-200 fw-semibold">Message to analyze</label>
+      <textarea
+        id="messageInput"
+        rows="7"
+        class="form-control auth-input rounded-3"
+        placeholder=""
+      ></textarea>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap mb-4">
+      <button type="button" class="btn btn-warning fw-semibold rounded-3 px-4">Check for spam</button>
+      <button type="button" class="btn btn-outline-info rounded-3 px-4">Load sample text</button>
+    </div>
+
+    <div class="result-card rounded-3 p-3 p-md-4">
+      <p class="mb-2 text-uppercase result-label">Latest result</p>
+      <h2 class="h5 fw-semibold mb-2 text-white">No analysis yet</h2>
+      <p class="mb-0 text-slate-300">Your model output can be displayed here with confidence, detected keywords and recommended action.</p>
+    </div>
+  </div>
+</section>
