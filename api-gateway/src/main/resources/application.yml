@@ -17,22 +17,6 @@ spring:
           filters:
             - StripPrefix=1
 
-        # ── Future: User Service ───────────────────────────────────────────────
-        # - id: user-service
-        #   uri: ${USER_SERVICE_URL:http://user-service:8001}
-        #   predicates:
-        #     - Path=/users/**
-        #   filters:
-        #     - StripPrefix=1
-
-        # ── Future: History Service ────────────────────────────────────────────
-        # - id: history-service
-        #   uri: ${HISTORY_SERVICE_URL:http://history-service:8002}
-        #   predicates:
-        #     - Path=/history/**
-        #   filters:
-        #     - StripPrefix=1
-
 management:
   endpoints:
     web:

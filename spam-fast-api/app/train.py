@@ -10,7 +10,7 @@ DATA_PATH = pathlib.Path(__file__).parent.parent / "data" / "email_text.csv"
 MODEL_DIR = pathlib.Path(__file__).parent / "model"
 MODEL_PATH = MODEL_DIR / "spam_model.joblib"
 
-
+# https://www.kaggle.com/datasets/bayes2003/emails-for-spam-or-ham-classification-enron-2006?resource=download
 def train() -> None:
     print("Loading dataset...")
     df = pd.read_csv(DATA_PATH)
