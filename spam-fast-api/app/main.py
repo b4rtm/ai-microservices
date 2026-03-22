@@ -1,12 +1,23 @@
+import os
 import pathlib
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import httpx
 import joblib
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 MODEL_PATH = pathlib.Path(__file__).parent / "model" / "spam_model.joblib"
+
+CONSUL_HOST = os.getenv("CONSUL_HOST", "localhost")
+CONSUL_PORT = os.getenv("CONSUL_PORT", "8500")
+CONSUL_URL = f"http://{CONSUL_HOST}:{CONSUL_PORT}/v1"
+
+SERVICE_ID = "spam-detection-service-1"
+SERVICE_NAME = "spam-detection-service"
+SERVICE_ADDRESS = os.getenv("SERVICE_ADDRESS", "spam-detection-service")
+SERVICE_PORT = 8000
 
 model = None
 
@@ -19,7 +30,28 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
             f"Model not found at {MODEL_PATH}. Run 'python -m app.train' first."
         )
     model = joblib.load(MODEL_PATH)
+
+    async with httpx.AsyncClient() as client:
+        await client.put(
+            f"{CONSUL_URL}/agent/service/register",
+            json={
+                "ID": SERVICE_ID,
+                "Name": SERVICE_NAME,
+                "Address": SERVICE_ADDRESS,
+                "Port": SERVICE_PORT,
+                "Check": {
+                    "HTTP": f"http://{SERVICE_ADDRESS}:{SERVICE_PORT}/health",
+                    "Interval": "10s",
+                    "DeregisterCriticalServiceAfter": "1m",
+                },
+            },
+        )
+
     yield
+
+    async with httpx.AsyncClient() as client:
+        await client.put(f"{CONSUL_URL}/agent/service/deregister/{SERVICE_ID}")
+
     model = None
 
 

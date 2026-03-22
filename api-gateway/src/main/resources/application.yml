@@ -5,6 +5,15 @@ spring:
   application:
     name: api-gateway
   cloud:
+    consul:
+      host: ${CONSUL_HOST:localhost}
+      port: ${CONSUL_PORT:8500}
+      discovery:
+        service-name: api-gateway
+        instance-id: api-gateway-1
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        prefer-ip-address: true
     gateway:
       globalcors:
         corsConfigurations:
