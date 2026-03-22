@@ -17,19 +17,37 @@
         id="messageInput"
         rows="7"
         class="form-control auth-input rounded-3"
-        placeholder=""
+        [(ngModel)]="messageText"
       ></textarea>
+      @if (errorMessage) {
+        <p class="text-danger mt-2 mb-0 fw-semibold">{{ errorMessage }}</p>
+      }
     </div>
 
     <div class="d-flex gap-2 flex-wrap mb-4">
-      <button type="button" class="btn btn-warning fw-semibold rounded-3 px-4">Check for spam</button>
-      <button type="button" class="btn btn-outline-info rounded-3 px-4">Load sample text</button>
+      <button
+        type="button"
+        class="btn btn-warning fw-semibold rounded-3 px-4"
+        (click)="checkForSpam()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Checking...' : 'Check for spam' }}
+      </button>
     </div>
 
     <div class="result-card rounded-3 p-3 p-md-4">
       <p class="mb-2 text-uppercase result-label">Latest result</p>
-      <h2 class="h5 fw-semibold mb-2 text-white">No analysis yet</h2>
-      <p class="mb-0 text-slate-300">Your model output can be displayed here with confidence, detected keywords and recommended action.</p>
+      @if (latestResult) {
+        <h2 class="h5 fw-semibold mb-2" [class.result-spam]="latestResult.category === 'spam'" [class.result-safe]="latestResult.category !== 'spam'">
+          {{ latestResult.category === 'spam' ? 'Spam detected' : 'Looks safe' }}
+        </h2>
+        <p class="mb-0 text-slate-300">
+          Spam probability: <strong>{{ (latestResult.spam_probability * 100).toFixed(1) }}%</strong>
+        </p>
+      } @else {
+        <h2 class="h5 fw-semibold mb-2 text-white">No analysis yet</h2>
+        <p class="mb-0 text-slate-300">Submit a message to see prediction category and spam probability.</p>
+      }
     </div>
   </div>
 </section>

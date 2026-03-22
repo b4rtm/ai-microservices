@@ -3,6 +3,14 @@
   animation: pulse-in 500ms ease;
 }
 
+.result-spam {
+  color: #ff9f9f;
+}
+
+.result-safe {
+  color: #87f2c6;
+}
+
 @keyframes pulse-in {
   from {
     opacity: 0;

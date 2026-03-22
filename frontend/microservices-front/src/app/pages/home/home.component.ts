@@ -1,16 +1,25 @@
 import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MessageHistoryComponent, MessageHistoryItem } from '../../components/message-history/message-history.component';
+import { HomeService } from '../../services/home.service';
+import { SpamCheckResponse } from '../../Interfaces/SpamInterfaces';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, MessageHistoryComponent],
+  imports: [FormsModule, RouterLink, MessageHistoryComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-  readonly messageHistory: MessageHistoryItem[] = [
+  messageText = '';
+  isSubmitting = false;
+  errorMessage = '';
+  latestResult: SpamCheckResponse | null = null;
+
+  messageHistory: MessageHistoryItem[] = [
     {
       id: 1,
       preview: 'Claim your prize now! Limited reward waiting. Click this link immediately.',
@@ -40,4 +49,53 @@ export class HomeComponent {
       checkedAt: 'Yesterday, 11:26'
     }
   ];
+
+  constructor(private readonly homeService: HomeService) {}
+
+  checkForSpam(): void {
+    const text = this.messageText.trim();
+
+    if (!text) {
+      this.errorMessage = 'Please enter a message before checking.';
+      return;
+    }
+
+    this.errorMessage = '';
+    this.isSubmitting = true;
+
+    this.homeService
+      .predictSpam({ text })
+      .pipe(finalize(() => (this.isSubmitting = false)))
+      .subscribe({
+        next: (response) => {
+          this.latestResult = response;
+
+          const status = response.category === 'spam' ? 'spam' : 'safe';
+
+          this.messageHistory = [
+            {
+              id: Date.now(),
+              preview: text.slice(0, 110),
+              status,
+              confidence: Math.round(response.spam_probability * 100),
+              checkedAt: this.formatCheckedAt()
+            },
+            ...this.messageHistory
+          ];
+        },
+        error: () => {
+          this.errorMessage = 'Prediction request failed. Please make sure the backend is running on localhost:8080.';
+        }
+      });
+  }
+
+  private formatCheckedAt(): string {
+    const now = new Date();
+    return now.toLocaleString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit'
+    });
+  }
 }
