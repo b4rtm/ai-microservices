@@ -6,6 +6,18 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: false
       routes:
         # ── Spam Detection Service ─────────────────────────────────────────────
         #   /spam/predict  →  http://spam-detection-service:8000/predict

@@ -31,7 +31,6 @@ class PredictRequest(BaseModel):
 
 
 class PredictResponse(BaseModel):
-    label: int
     category: str
     spam_probability: float
 
@@ -51,7 +50,6 @@ def predict(request: PredictRequest) -> PredictResponse:
     label = int(spam_prob >= 0.5)
 
     return PredictResponse(
-        label=label,
-        category="spam" if label == 1 else "ham",
+        category="spam" if label == 1 else "not-spam",
         spam_probability=round(spam_prob, 4),
     )
