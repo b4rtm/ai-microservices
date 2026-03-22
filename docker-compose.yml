@@ -39,6 +39,18 @@ services:
       - microservices-net
     restart: unless-stopped
 
+  # ── Frontend (Angular + Nginx) ────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend/microservices-front
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
   # ── Future services ────────────────────────────────────────────────────────
   # user-service:
   #   build:
