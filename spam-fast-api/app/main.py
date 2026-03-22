@@ -46,10 +46,15 @@ def predict(request: PredictRequest) -> PredictResponse:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
     proba = model.predict_proba([request.text])[0]
-    spam_prob = float(proba[1])
-    label = int(spam_prob >= 0.5)
+    classes = [str(c).lower() for c in model.classes_]
+    if "spam" not in classes:
+        raise HTTPException(status_code=500, detail="Model classes missing 'spam' label")
+
+    spam_idx = classes.index("spam")
+    spam_prob = float(proba[spam_idx])
+    predicted_label = str(model.predict([request.text])[0]).lower()
 
     return PredictResponse(
-        category="spam" if label == 1 else "not-spam",
+        category="spam" if predicted_label == "spam" else "not-spam",
         spam_probability=round(spam_prob, 4),
     )
