@@ -29,6 +29,12 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
 
+        <!-- Consul Service Discovery -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+        </dependency>
+
         <!-- Actuator for /actuator/health, /actuator/info -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

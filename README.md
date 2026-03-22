@@ -30,6 +30,7 @@ docker-compose up -d --build
 ```
 
 The first build will take a few minutes as it:
+
 - Trains and bakes the spam model into the image
 - Compiles the Spring Boot gateway
 - Builds the Angular app
@@ -44,21 +45,21 @@ docker-compose down
 
 Only rebuild the service you changed — other services keep running.
 
-| Changed | Command |
-|---|---|
-| Frontend (Angular) | `docker-compose up -d --build frontend` |
-| API Gateway (Spring Boot) | `docker-compose up -d --build api-gateway` |
+| Changed                     | Command                                               |
+| --------------------------- | ----------------------------------------------------- |
+| Frontend (Angular)          | `docker-compose up -d --build frontend`               |
+| API Gateway (Spring Boot)   | `docker-compose up -d --build api-gateway`            |
 | Spam service (FastAPI / ML) | `docker-compose up -d --build spam-detection-service` |
 
 ## Service URLs
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:4200 |
-| API Gateway | http://localhost:8080 |
-| Spam Detection (direct) | http://localhost:8000 |
-| Gateway health | http://localhost:8080/actuator/health |
-| Spam health (via gateway) | http://localhost:8080/spam/health |
+| Service                   | URL                                   |
+| ------------------------- | ------------------------------------- |
+| Frontend                  | http://localhost:4200                 |
+| API Gateway               | http://localhost:8080                 |
+| Spam Detection (direct)   | http://localhost:8000                 |
+| Gateway health            | http://localhost:8080/actuator/health |
+| Spam health (via gateway) | http://localhost:8080/spam/health     |
 
 ## API
 
