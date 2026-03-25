@@ -1,5 +1,8 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 
+USER root
+RUN mkdir -p /run/secrets && chmod 755 /run/secrets
+
 WORKDIR /app
 
 COPY pom.xml .
