@@ -8,16 +8,16 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
-@Path("/history")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Path("/user")
 public class SpamHistoryResource {
 
     @Inject
     SpamHistoryService spamHistoryService;
 
     @GET
-    @Path("/user/{userId}")
+    @Path("/{userId}")
     public List<SpamDTO> getByUserId(@PathParam("userId") Long userId) {
         return spamHistoryService.getByUserId(userId);
     }

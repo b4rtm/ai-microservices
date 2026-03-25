@@ -24,6 +24,7 @@ spring:
               - GET
               - POST
               - PUT
+              - PATCH
               - DELETE
               - OPTIONS
             allowedHeaders:
@@ -37,6 +38,12 @@ spring:
           uri: ${SPAM_SERVICE_URL:http://spam-detection-service:8000}
           predicates:
             - Path=/spam/**
+          filters:
+            - StripPrefix=1
+        - id: spam-history-service
+          uri: ${SPAM_HISTORY_SERVICE_URL:http://spam-history-service:8082}
+          predicates:
+            - Path=/history/**
           filters:
             - StripPrefix=1
 
