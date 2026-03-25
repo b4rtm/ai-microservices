@@ -1,9 +1,5 @@
 version: '3.8'
 
-networks:
-  microservices-net:
-    driver: overlay
-
 services:
   consul:
     image: consul:1.15
@@ -12,28 +8,14 @@ services:
     command: agent -dev -client=0.0.0.0
     networks:
       - microservices-net
-    healthcheck:
-      test: ["CMD", "consul", "members"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    deploy:
-      restart_policy:
-        condition: on-failure
 
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_rootpw
-      MYSQL_USER_FILE: /run/secrets/mysql_user
-      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
-      MYSQL_DATABASE_FILE: /run/secrets/mysql_db
-    secrets:
-      - mysql_password
-      - mysql_user
-      - mysql_db
-      - mysql_rootpw
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "3306:3306"
     volumes:
@@ -41,82 +23,80 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     networks:
       - microservices-net
-    deploy:
-      restart_policy:
-        condition: on-failure
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8085:80"
+    networks:
+      - microservices-net
 
   quarkus:
+    build:
+      context: ./microservices/quarkus
+      dockerfile: Dockerfile
     image: quarkus-app:latest
     environment:
-      QUARKUS_DATASOURCE_USERNAME_FILE: /run/secrets/mysql_user
-      QUARKUS_DATASOURCE_PASSWORD_FILE: /run/secrets/mysql_password
-    secrets:
-      - mysql_password
-      - mysql_user
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:mysql://mysql:3306/mydb
+      QUARKUS_DATASOURCE_USERNAME: user
+      QUARKUS_DATASOURCE_PASSWORD: password
     ports:
       - "8082:8082"
     networks:
       - microservices-net
-    deploy:
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - mysql
 
   spam-detection-service:
+    build:
+      context: ./spam-detection-service
+      dockerfile: Dockerfile
     image: spam-detection-service:latest
     ports:
       - "8000:8000"
     environment:
-      - CONSUL_HOST=consul
-      - CONSUL_PORT=8500
+      CONSUL_HOST: consul
+      CONSUL_PORT: 8500
     networks:
       - microservices-net
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    deploy:
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - consul
 
   api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
     image: api-gateway:latest
     ports:
       - "8080:8080"
     environment:
-      - SPAM_SERVICE_URL=http://spam-detection-service:8000
-      - CONSUL_HOST=consul
-      - CONSUL_PORT=8500
+      SPAM_SERVICE_URL: http://spam-detection-service:8000
+      CONSUL_HOST: consul
+      CONSUL_PORT: 8500
     networks:
       - microservices-net
-    deploy:
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - spam-detection-service
+      - consul
 
   frontend:
+    build:
+      context: ./frontend/microservices-front
+      dockerfile: Dockerfile
     image: frontend-app:latest
     ports:
       - "4200:80"
     networks:
       - microservices-net
-    deploy:
-      restart_policy:
-        condition: on-failure
+    depends_on:
+      - api-gateway
 
-secrets:
-  mysql_password:
-    external: true
-  mysql_user:
-    external: true
-  mysql_db:
-    external: true
-  mysql_rootpw:
-    external: true
+networks:
+  microservices-net:
 
 volumes:
   mysql_data:
