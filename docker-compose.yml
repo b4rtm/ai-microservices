@@ -1,65 +1,10 @@
+version: '3.8'
+
 networks:
   microservices-net:
-    driver: bridge
+    driver: overlay
 
 services:
-  # ── Spam Detection Service (FastAPI + scikit-learn) ────────────────────────
-  spam-detection-service:
-    build:
-      context: ./spam-fast-api
-    ports:
-      - "8000:8000"
-    environment:
-      - CONSUL_HOST=consul
-      - CONSUL_PORT=8500
-    networks:
-      - microservices-net
-    depends_on:
-      consul:
-        condition: service_healthy
-    healthcheck:
-      # Uses Python stdlib so no curl/wget needed in the slim image
-      test:
-        [
-          "CMD-SHELL",
-          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:8000/health'')"',
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    restart: unless-stopped
-
-  # ── API Gateway (Spring Boot / Spring Cloud Gateway) ──────────────────────
-  api-gateway:
-    build:
-      context: ./api-gateway
-    ports:
-      - "8080:8080"
-    environment:
-      - SPAM_SERVICE_URL=http://spam-detection-service:8000
-      - CONSUL_HOST=consul
-      - CONSUL_PORT=8500
-    depends_on:
-      spam-detection-service:
-        condition: service_healthy
-      consul:
-        condition: service_healthy
-    networks:
-      - microservices-net
-    restart: unless-stopped
-
-  # ── Frontend (Angular + Nginx) ────────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend/microservices-front
-    ports:
-      - "4200:80"
-    depends_on:
-      - api-gateway
-    networks:
-      - microservices-net
-    restart: unless-stopped
   consul:
     image: consul:1.15
     ports:
@@ -73,25 +18,105 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    restart: unless-stopped
+    deploy:
+      restart_policy:
+        condition: on-failure
 
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_rootpw
+      MYSQL_USER_FILE: /run/secrets/mysql_user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_DATABASE_FILE: /run/secrets/mysql_db
+    secrets:
+      - mysql_password
+      - mysql_user
+      - mysql_db
+      - mysql_rootpw
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - microservices-net
+    deploy:
+      restart_policy:
+        condition: on-failure
 
+  quarkus:
+    image: quarkus-app:latest
+    environment:
+      QUARKUS_DATASOURCE_USERNAME_FILE: /run/secrets/mysql_user
+      QUARKUS_DATASOURCE_PASSWORD_FILE: /run/secrets/mysql_password
+    secrets:
+      - mysql_password
+      - mysql_user
+    ports:
+      - "8082:8082"
+    networks:
+      - microservices-net
+    deploy:
+      restart_policy:
+        condition: on-failure
 
+  spam-detection-service:
+    image: spam-detection-service:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+    networks:
+      - microservices-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      restart_policy:
+        condition: on-failure
 
+  api-gateway:
+    image: api-gateway:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - SPAM_SERVICE_URL=http://spam-detection-service:8000
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+    networks:
+      - microservices-net
+    deploy:
+      restart_policy:
+        condition: on-failure
 
-  # ── Future services ────────────────────────────────────────────────────────
-  # user-service:
-  #   build:
-  #     context: ./user-service
-  #   ports:
-  #     - "8001:8001"
-  #   networks:
-  #     - microservices-net
+  frontend:
+    image: frontend-app:latest
+    ports:
+      - "4200:80"
+    networks:
+      - microservices-net
+    deploy:
+      restart_policy:
+        condition: on-failure
 
-  # history-service:
-  #   build:
-  #     context: ./history-service
-  #   ports:
-  #     - "8002:8002"
-  #   networks:
-  #     - microservices-net
+secrets:
+  mysql_password:
+    external: true
+  mysql_user:
+    external: true
+  mysql_db:
+    external: true
+  mysql_rootpw:
+    external: true
+
+volumes:
+  mysql_data:
