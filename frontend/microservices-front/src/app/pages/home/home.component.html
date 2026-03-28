@@ -1,4 +1,9 @@
-<app-message-history [history]="messageHistory" />
+<app-message-history
+  [history]="messageHistory"
+  [isLoading]="isLoadingHistory"
+  [hasMore]="hasMoreHistory"
+  (loadMore)="onHistoryScrollEnd()"
+/>
 
 <section class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
   <div class="glass-panel rounded-4 p-4 p-md-5 w-100 max-w-3xl">

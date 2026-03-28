@@ -14,11 +14,18 @@ public class SpamHistoryService {
     @Inject
     SpamHistoryRepository spamHistoryRepository;
 
-    public List<SpamDTO> getByUserId(Long id){
-        return spamHistoryRepository.findAllByUserId(id)
+    public SpamPageResponse getByUserId(Long id, int page, int size) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size > 0 ? size : 10;
+        long totalElements = spamHistoryRepository.countByUserId(id);
+        int totalPages = (int) Math.ceil((double) totalElements / safeSize);
+
+        List<SpamDTO> content = spamHistoryRepository.findAllByUserId(id, safePage, safeSize)
                 .stream()
                 .map(Mapper::toDTO)
                 .collect(Collectors.toList());
+
+        return new SpamPageResponse(content, safePage, safeSize, totalElements, totalPages);
     }
 
     @Transactional

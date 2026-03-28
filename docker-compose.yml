@@ -51,7 +51,7 @@ services:
 
   spam-detection-service:
     build:
-      context: ./spam-detection-service
+      context: ./spam-fast-api
       dockerfile: Dockerfile
     image: spam-detection-service:latest
     ports:

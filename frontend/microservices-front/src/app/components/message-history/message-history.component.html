@@ -4,7 +4,7 @@
 
 <div class="history-overlay" [class.history-overlay--visible]="isOpen" (click)="close()"></div>
 
-<aside class="history-drawer" [class.history-drawer--open]="isOpen" aria-label="Message history panel">
+<aside class="history-drawer" [class.history-drawer--open]="isOpen" aria-label="Message history panel" (scroll)="onScroll($event)">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <div>
       <p class="mb-1 text-uppercase history-label">Recent checks</p>
@@ -27,6 +27,14 @@
         <p class="mb-1 history-preview">{{ item.preview }}</p>
         <small class="text-slate-300">Confidence: {{ item.confidence }}%</small>
       </article>
+    }
+
+    @if (isLoading) {
+      <p class="history-meta text-slate-300 mb-0">Loading more...</p>
+    }
+
+    @if (!hasMore && history.length > 0) {
+      <p class="history-meta text-slate-300 mb-0">No more history entries.</p>
     }
   </div>
 </aside>

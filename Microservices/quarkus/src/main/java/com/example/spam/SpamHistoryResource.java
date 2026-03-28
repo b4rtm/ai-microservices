@@ -1,12 +1,8 @@
 package com.example.spam;
-
-import com.example.spam.SpamDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.util.List;
 
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -18,8 +14,12 @@ public class SpamHistoryResource {
 
     @GET
     @Path("/{userId}")
-    public List<SpamDTO> getByUserId(@PathParam("userId") Long userId) {
-        return spamHistoryService.getByUserId(userId);
+    public SpamPageResponse getByUserId(
+            @PathParam("userId") Long userId,
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("size") @DefaultValue("10") int size
+    ) {
+        return spamHistoryService.getByUserId(userId, page, size);
     }
 
     @POST

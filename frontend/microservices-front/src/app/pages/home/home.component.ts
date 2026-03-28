@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MessageHistoryComponent, MessageHistoryItem } from '../../components/message-history/message-history.component';
 import { HomeService } from '../../services/home.service';
-import { SpamCheckResponse } from '../../Interfaces/SpamInterfaces';
+import { SpamCheckResponse, SpamDTO } from '../../Interfaces/SpamInterfaces';
+import { HistoryService } from '../../services/history.service';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -13,44 +14,27 @@ import { finalize } from 'rxjs';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   messageText = '';
   isSubmitting = false;
   errorMessage = '';
   latestResult: SpamCheckResponse | null = null;
+  private readonly fallbackUserId = 1;
+  private readonly historyPageSize = 25;
+  private historyPage = 0;
+  hasMoreHistory = true;
+  isLoadingHistory = false;
 
-  messageHistory: MessageHistoryItem[] = [
-    {
-      id: 1,
-      preview: 'Claim your prize now! Limited reward waiting. Click this link immediately.',
-      status: 'spam',
-      confidence: 96,
-      checkedAt: 'Today, 09:41'
-    },
-    {
-      id: 2,
-      preview: 'Hi team, meeting moved to 15:00. Please confirm your availability.',
-      status: 'safe',
-      confidence: 91,
-      checkedAt: 'Today, 08:14'
-    },
-    {
-      id: 3,
-      preview: 'Your account has unusual activity. Verify details now to avoid suspension.',
-      status: 'spam',
-      confidence: 88,
-      checkedAt: 'Yesterday, 17:02'
-    },
-    {
-      id: 4,
-      preview: 'Invoice #4421 attached. Payment terms remain 14 days as agreed.',
-      status: 'safe',
-      confidence: 93,
-      checkedAt: 'Yesterday, 11:26'
-    }
-  ];
+  messageHistory: MessageHistoryItem[] = [];
 
-  constructor(private readonly homeService: HomeService) {}
+  constructor(
+    private readonly homeService: HomeService,
+    private readonly historyService: HistoryService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadHistory(true);
+  }
 
   checkForSpam(): void {
     const text = this.messageText.trim();
@@ -69,19 +53,7 @@ export class HomeComponent {
       .subscribe({
         next: (response) => {
           this.latestResult = response;
-
-          const status = response.category === 'spam' ? 'spam' : 'safe';
-
-          this.messageHistory = [
-            {
-              id: Date.now(),
-              preview: text.slice(0, 110),
-              status,
-              confidence: Math.round(response.spam_probability * 100),
-              checkedAt: this.formatCheckedAt()
-            },
-            ...this.messageHistory
-          ];
+          this.loadHistory(true);
         },
         error: () => {
           this.errorMessage = 'Prediction request failed. Please make sure the backend is running on localhost:8080.';
@@ -89,13 +61,76 @@ export class HomeComponent {
       });
   }
 
-  private formatCheckedAt(): string {
-    const now = new Date();
-    return now.toLocaleString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      day: '2-digit',
-      month: '2-digit'
+  onHistoryScrollEnd(): void {
+    this.loadHistory();
+  }
+
+  private loadHistory(reset = false): void {
+    if (this.isLoadingHistory) {
+      return;
+    }
+
+    if (reset) {
+      this.historyPage = 0;
+      this.hasMoreHistory = true;
+      this.messageHistory = [];
+    }
+
+    if (!this.hasMoreHistory) {
+      return;
+    }
+
+    this.isLoadingHistory = true;
+    const userId = this.resolveUserId();
+
+    this.historyService.getUserHistory(userId, this.historyPage, this.historyPageSize).subscribe({
+      next: (response) => {
+        const mapped = response.content
+          .filter((item) => !item.isDeleted)
+          .map((item) => this.mapToHistoryItem(item));
+
+        if (reset) {
+          this.messageHistory = mapped;
+        } else {
+          this.messageHistory = [...this.messageHistory, ...mapped];
+        }
+
+        this.historyPage += 1;
+        this.hasMoreHistory = this.historyPage < response.totalPages;
+      },
+      error: () => {
+        this.errorMessage = 'History request failed. Please make sure the backend is running on localhost:8080.';
+        this.isLoadingHistory = false;
+      },
+      complete: () => {
+        this.isLoadingHistory = false;
+      }
     });
+  }
+
+  private mapToHistoryItem(item: SpamDTO): MessageHistoryItem {
+    return {
+      id: item.id,
+      preview: item.text.slice(0, 110),
+      status: item.category === 'spam' ? 'spam' : 'safe',
+      confidence: this.toPercent(item.prediction),
+      checkedAt: `Entry #${item.id}`
+    };
+  }
+
+  private toPercent(value: number): number {
+    const normalized = value <= 1 ? value * 100 : value;
+    return Math.max(0, Math.min(100, Math.round(normalized)));
+  }
+
+  private resolveUserId(): number {
+    const storedUserId = localStorage.getItem('userId');
+    const parsed = Number(storedUserId);
+
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+
+    return this.fallbackUserId;
   }
 }

@@ -7,10 +7,19 @@ export interface SpamCheckResponse {
     spam_probability: number;
 }
 
-export interface SpamHistoryItem {
+export interface SpamDTO {
     id: number;
+    userId: number;
     text: string;
-    category: 'spam' | 'ham';
-    spam_probability: number;
-    checked_at: string;
+    category: string;
+    prediction: number;
+    isDeleted: boolean;
+}
+
+export interface SpamPageResponse {
+    content: SpamDTO[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
 }
