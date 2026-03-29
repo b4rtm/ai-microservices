@@ -7,7 +7,7 @@ import { SpamPageResponse } from '../Interfaces/SpamInterfaces';
   providedIn: 'root'
 })
 export class HistoryService {
-  private readonly baseUrl = 'http://localhost:8080';
+  private readonly baseUrl = 'http://localhost:8080/history';
 
   constructor(private readonly http: HttpClient) {}
 
