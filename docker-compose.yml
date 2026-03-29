@@ -82,6 +82,21 @@ services:
       - spam-detection-service
       - consul
 
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    image: user-service:latest
+    ports:
+      - "8081:8081"
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    networks:
+      - microservices-net
+    depends_on:
+      - mysql
+
   frontend:
     build:
       context: ./frontend/microservices-front
