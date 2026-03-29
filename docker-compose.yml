@@ -82,6 +82,20 @@ services:
       - spam-detection-service
       - consul
 
+  mysql-users:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: users_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_users_data:/var/lib/mysql
+      - ./mysql-users-init:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - microservices-net
+
   user-service:
     build:
       context: ./user-service
@@ -90,12 +104,13 @@ services:
     ports:
       - "8081:8081"
     environment:
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-users:3306/users_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
     networks:
       - microservices-net
     depends_on:
-      - mysql
+      - mysql-users
 
   frontend:
     build:
@@ -113,4 +128,5 @@ networks:
   microservices-net:
 
 volumes:
+  mysql_users_data:
   mysql_data:
