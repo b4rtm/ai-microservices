@@ -76,11 +76,13 @@ services:
       SPAM_SERVICE_URL: http://spam-detection-service:8000
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
+      USER_SERVICE_URL: http://user-service:8081
     networks:
       - microservices-net
     depends_on:
       - spam-detection-service
       - consul
+      - user-service
 
   mysql-users:
     image: mysql:8.0

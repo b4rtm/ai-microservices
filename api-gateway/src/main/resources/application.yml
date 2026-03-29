@@ -46,6 +46,10 @@ spring:
             - Path=/history/**
           filters:
             - StripPrefix=1
+        - id: user-service
+          uri: ${USER_SERVICE_URL:http://user-service:8081}
+          predicates:
+            - Path=/users/**
 
 management:
   endpoints:
