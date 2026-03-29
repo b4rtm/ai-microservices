@@ -6,6 +6,7 @@ import { HomeService } from '../../services/home.service';
 import { SpamCheckResponse, SpamDTO } from '../../Interfaces/SpamInterfaces';
 import { HistoryService } from '../../services/history.service';
 import { finalize } from 'rxjs';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +18,6 @@ import { finalize } from 'rxjs';
 export class HomeComponent implements OnInit {
   messageText = '';
   isSubmitting = false;
-  errorMessage = '';
   latestResult: SpamCheckResponse | null = null;
   private readonly fallbackUserId = 1;
   private readonly historyPageSize = 25;
@@ -29,7 +29,8 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private readonly homeService: HomeService,
-    private readonly historyService: HistoryService
+    private readonly historyService: HistoryService,
+    private readonly toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -40,11 +41,10 @@ export class HomeComponent implements OnInit {
     const text = this.messageText.trim();
 
     if (!text) {
-      this.errorMessage = 'Please enter a message before checking.';
+      this.toastService.warning('Please enter a message before checking.');
       return;
     }
 
-    this.errorMessage = '';
     this.isSubmitting = true;
 
     this.homeService
@@ -56,7 +56,7 @@ export class HomeComponent implements OnInit {
           this.loadHistory(true);
         },
         error: () => {
-          this.errorMessage = 'Prediction request failed. Please make sure the backend is running on localhost:8080.';
+          this.toastService.error('Prediction request failed. Please make sure the backend is running on localhost:8080.');
         }
       });
   }
@@ -99,7 +99,7 @@ export class HomeComponent implements OnInit {
         this.hasMoreHistory = this.historyPage < response.totalPages;
       },
       error: () => {
-        this.errorMessage = 'History request failed. Please make sure the backend is running on localhost:8080.';
+        this.toastService.error('History request failed. Please make sure the backend is running on localhost:8080.');
         this.isLoadingHistory = false;
       },
       complete: () => {
