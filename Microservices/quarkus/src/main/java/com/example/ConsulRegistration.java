@@ -23,6 +23,9 @@ public class ConsulRegistration {
     @ConfigProperty(name = "quarkus.http.port")
     int servicePort;
 
+    @ConfigProperty(name = "service.address")
+    String serviceAddress;
+
     void init(@Observes StartupEvent ev, Vertx vertx) {
         ConsulClient client = ConsulClient.create(
                 vertx,
@@ -33,11 +36,11 @@ public class ConsulRegistration {
                 new ServiceOptions()
                         .setName("quarkus-service")
                         .setId("quarkus-service-1")
-                        .setAddress("quarkus")
+                        .setAddress(serviceAddress)
                         .setPort(servicePort)
                         .setCheckOptions(
                                 new CheckOptions()
-                                        .setHttp("http://quarkus:" + servicePort + "/q/health/ready")
+                                        .setHttp("http://" + serviceAddress + ":" + servicePort + "/q/health/ready")
                                         .setInterval("10s")
                                         //.setDeregisterAfter("1m")
                         )
