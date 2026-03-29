@@ -1,24 +1,30 @@
-<div class="toast-host fixed top-4 right-4 z-[1200] grid gap-3 w-[min(92vw,420px)] sm:w-[min(88vw,440px)]" aria-live="polite" aria-atomic="true">
-	@if (toasts$ | async; as toasts) {
-		@for (toast of toasts; track trackByToastId($index, toast)) {
-			<article
-				class="toast-item alert d-flex align-items-start justify-content-between gap-3 mb-0 px-3 py-3 rounded-4 border-0 shadow-lg"
-				[ngClass]="'toast-' + toast.type"
-				role="status"
-			>
-				<div class="toast-content min-w-0">
-					@if (toast.title) {
-						<p class="toast-title fw-semibold text-uppercase tracking-[0.12em] mb-1">{{ toast.title }}</p>
-					}
-					<p class="toast-message mb-0 text-sm leading-5">{{ toast.message }}</p>
-				</div>
-				<button
-					type="button"
-					class="btn-close btn-close-white flex-shrink-0"
-					aria-label="Dismiss notification"
-					(click)="dismiss(toast.id)"
-				></button>
-			</article>
-		}
-	}
+<div
+  class="toast-host fixed top-4 right-4 z-[1200] grid gap-3 w-[min(92vw,420px)] sm:w-[min(88vw,440px)]"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  @if (toasts$ | async; as toasts) {
+    @for (toast of toasts; track trackByToastId($index, toast)) {
+      <article
+        class="toast-item alert d-flex align-items-start justify-content-between gap-3 mb-0 px-3 py-3 rounded-4 border-0 shadow-lg"
+        [ngClass]="'toast-' + toast.type"
+        role="status"
+      >
+        <div class="toast-content min-w-0">
+          @if (toast.title) {
+            <p class="toast-title fw-semibold text-uppercase tracking-[0.12em] mb-1">
+              {{ toast.title }}
+            </p>
+          }
+          <p class="toast-message mb-0 text-sm leading-5">{{ toast.message }}</p>
+        </div>
+        <button
+          type="button"
+          class="btn-close btn-close-white flex-shrink-0"
+          aria-label="Dismiss notification"
+          (click)="dismiss(toast.id)"
+        ></button>
+      </article>
+    }
+  }
 </div>

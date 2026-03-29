@@ -36,7 +36,13 @@ export class ToastService {
     return this.show({ type: 'warning', message, title, duration });
   }
 
-  show(input: { type: ToastType; message: string; title?: string; duration?: number; autohide?: boolean }) {
+  show(input: {
+    type: ToastType;
+    message: string;
+    title?: string;
+    duration?: number;
+    autohide?: boolean;
+  }) {
     const id = this.generateId();
     const toast: Toast = {
       id,
@@ -58,7 +64,7 @@ export class ToastService {
   }
 
   remove(id: string) {
-    const next = this.toastsSubject.value.filter(t => t.id !== id);
+    const next = this.toastsSubject.value.filter((t) => t.id !== id);
     this.toastsSubject.next(next);
   }
 

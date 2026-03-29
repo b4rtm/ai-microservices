@@ -6,10 +6,10 @@ import { AdminService } from '../../services/admin.service';
   selector: 'app-admin-panel',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './admin-panel.component.html',
-  styleUrl: './admin-panel.component.scss',
+  templateUrl: './admin-panel-2.component.html',
+  styleUrl: './admin-panel-2.component.scss',
 })
-export class AdminPanelComponent implements OnInit {
+export class AdminPanel2Component implements OnInit {
   users: any[] = [
     { id: 1, email: 'user1@example.com', role: 'user', blocked: false },
     { id: 2, email: 'user2@example.com', role: 'admin', blocked: false },
