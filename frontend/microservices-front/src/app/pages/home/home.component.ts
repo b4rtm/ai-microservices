@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MessageHistoryComponent, MessageHistoryItem } from '../../components/message-history/message-history.component';
+import {
+  MessageHistoryComponent,
+  MessageHistoryItem,
+} from '../../components/message-history/message-history.component';
 import { HomeService } from '../../services/home.service';
 import { SpamCheckResponse, SpamDTO } from '../../Interfaces/SpamInterfaces';
 import { HistoryService } from '../../services/history.service';
@@ -13,7 +16,7 @@ import { ToastService } from '../../services/toast.service';
   standalone: true,
   imports: [FormsModule, RouterLink, MessageHistoryComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.scss'
+  styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
   messageText = '';
@@ -30,7 +33,7 @@ export class HomeComponent implements OnInit {
   constructor(
     private readonly homeService: HomeService,
     private readonly historyService: HistoryService,
-    private readonly toastService: ToastService
+    private readonly toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -56,8 +59,10 @@ export class HomeComponent implements OnInit {
           this.loadHistory(true);
         },
         error: () => {
-          this.toastService.error('Prediction request failed. Please make sure the backend is running on localhost:8080.');
-        }
+          this.toastService.error(
+            'Prediction request failed. Please make sure the backend is running on localhost:8080.',
+          );
+        },
       });
   }
 
@@ -99,12 +104,14 @@ export class HomeComponent implements OnInit {
         this.hasMoreHistory = this.historyPage < response.totalPages;
       },
       error: () => {
-        this.toastService.error('History request failed. Please make sure the backend is running on localhost:8080.');
+        this.toastService.error(
+          'History request failed. Please make sure the backend is running on localhost:8080.',
+        );
         this.isLoadingHistory = false;
       },
       complete: () => {
         this.isLoadingHistory = false;
-      }
+      },
     });
   }
 
@@ -114,7 +121,7 @@ export class HomeComponent implements OnInit {
       preview: item.text.slice(0, 110),
       status: item.category === 'spam' ? 'spam' : 'safe',
       confidence: this.toPercent(item.prediction),
-      checkedAt: `Entry #${item.id}`
+      checkedAt: `Entry #${item.id}`,
     };
   }
 

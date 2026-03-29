@@ -14,7 +14,7 @@ export interface MessageHistoryItem {
   selector: 'app-message-history',
   standalone: true,
   templateUrl: './message-history.component.html',
-  styleUrl: './message-history.component.scss'
+  styleUrl: './message-history.component.scss',
 })
 export class MessageHistoryComponent {
   @Input({ required: true }) history: MessageHistoryItem[] = [];
