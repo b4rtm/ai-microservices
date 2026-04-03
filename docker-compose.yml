@@ -74,6 +74,7 @@ services:
       - "8080:8080"
     environment:
       SPAM_SERVICE_URL: http://spam-detection-service:8000
+      SPAM_HISTORY_SERVICE_URL: http://spam-history-service:8082
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
       USER_SERVICE_URL: http://user-service:8081
@@ -83,6 +84,7 @@ services:
       - spam-detection-service
       - consul
       - user-service
+      - spam-history-service
 
   mysql-users:
     image: mysql:8.0

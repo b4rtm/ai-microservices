@@ -15,29 +15,13 @@ spring:
         health-check-interval: 10s
         prefer-ip-address: true
     gateway:
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:4200"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
       routes:
-        # ── Spam Detection Service ─────────────────────────────────────────────
-        #   /spam/predict  →  http://spam-detection-service:8000/predict
-        #   /spam/health   →  http://spam-detection-service:8000/health
+        # /spam/predict is handled by SpamOrchestrationController (orchestrates spam + history)
+        # /spam/health is still proxied directly
         - id: spam-detection-service
           uri: ${SPAM_SERVICE_URL:http://spam-detection-service:8000}
           predicates:
-            - Path=/spam/**
+            - Path=/spam/health
           filters:
             - StripPrefix=1
         - id: spam-history-service
