@@ -78,6 +78,7 @@ services:
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
       USER_SERVICE_URL: http://user-service:8081
+      JWT_SECRET: sakldjasjfldkjgaosdifjdnasldkjaslkdjaslkdjfdsfuoasilkjdm
     networks:
       - microservices-net
     depends_on:

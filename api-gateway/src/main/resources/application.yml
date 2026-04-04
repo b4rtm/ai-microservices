@@ -35,6 +35,10 @@ spring:
           predicates:
             - Path=/users/**
 
+jwt:
+  secret: ${JWT_SECRET:change-this-secret-key-for-production-min-32-chars!}
+  expiration: 86400000
+
 management:
   endpoints:
     web:

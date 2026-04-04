@@ -1,6 +1,7 @@
 package com.example.userservice.controller;
 
 import com.example.userservice.dto.UserDto;
+import com.example.userservice.dto.VerifyRequest;
 import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,12 @@ public class UserController {
         log.info("POST /users email={}", req.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(userService.createUser(req.getEmail(), req.getPassword(), req.getRole()));
+    }
+
+    @PostMapping("/verify")
+    public ResponseEntity<UserDto> verifyUser(@Valid @RequestBody VerifyRequest req) {
+        log.info("POST /users/verify email={}", req.getEmail());
+        return ResponseEntity.ok(userService.verifyUser(req.getEmail(), req.getPassword()));
     }
 
     @GetMapping("/email/{email}")

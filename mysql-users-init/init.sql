@@ -7,14 +7,15 @@ CREATE TABLE IF NOT EXISTS users (
     role     VARCHAR(50)  NOT NULL
 );
 
+-- Passwords are BCrypt-hashed; plain-text value: .JVBvTxJmQe
 INSERT INTO users (email, password, role) VALUES
-('alice@example.com',   '.JVBvTxJmQe', 'USER'),
-('bob@example.com',     '.JVBvTxJmQe', 'USER'),
-('carol@example.com',   '.JVBvTxJmQe', 'USER'),
-('dave@example.com',    '.JVBvTxJmQe', 'USER'),
-('eve@example.com',     '.JVBvTxJmQe', 'USER'),
-('frank@example.com',   '.JVBvTxJmQe', 'USER'),
-('grace@example.com',   '.JVBvTxJmQe', 'USER'),
-('henry@example.com',   '.JVBvTxJmQe', 'USER'),
-('iris@example.com',    '.JVBvTxJmQe', 'USER'),
-('admin@example.com',   '.JVBvTxJmQe', 'ADMIN');
+('alice@example.com',   '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('bob@example.com',     '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('carol@example.com',   '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('dave@example.com',    '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('eve@example.com',     '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('frank@example.com',   '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('grace@example.com',   '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('henry@example.com',   '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('iris@example.com',    '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'USER'),
+('admin@example.com',   '$2b$10$K8VhEMi/BJurHOPGDL//U.DNSTVgXF7qaGnZqkVqO1i6fL3BhRT5a', 'ADMIN');
