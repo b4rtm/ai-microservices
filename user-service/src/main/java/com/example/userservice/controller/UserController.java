@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,6 +32,25 @@ public class UserController {
     public ResponseEntity<UserDto> verifyUser(@Valid @RequestBody VerifyRequest req) {
         log.info("POST /users/verify email={}", req.getEmail());
         return ResponseEntity.ok(userService.verifyUser(req.getEmail(), req.getPassword()));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserDto>> getAllActiveUsers() {
+        return ResponseEntity.ok(userService.getAllActiveUsers());
+    }
+
+    @PatchMapping("/{id}/archive")
+    public ResponseEntity<Void> archiveUser(@PathVariable Long id) {
+        log.info("PATCH /users/{}/archive", id);
+        userService.archiveUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        log.info("DELETE /users/{}", id);
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/email/{email}")

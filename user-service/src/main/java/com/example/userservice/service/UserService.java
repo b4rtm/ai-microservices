@@ -10,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,10 +33,34 @@ public class UserService {
     public UserDto verifyUser(String email, String rawPassword) {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
+        if (user.isArchived()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account is archived");
+        }
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
         return toDto(user);
+    }
+
+    public List<UserDto> getAllActiveUsers() {
+        return userRepository.findAllByArchivedFalse().stream()
+            .map(this::toDto)
+            .toList();
+    }
+
+    public void archiveUser(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setArchived(true);
+        userRepository.save(user);
+        log.info("Archived user id={}", id);
+    }
+
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        userRepository.delete(user);
+        log.info("Deleted user id={}", id);
     }
 
     public UserDto getUserByEmail(String email) {
@@ -48,6 +74,12 @@ public class UserService {
     }
 
     private UserDto toDto(User u) {
-        return UserDto.builder().id(u.getId()).email(u.getEmail()).password(u.getPassword()).role(u.getRole()).build();
+        return UserDto.builder()
+            .id(u.getId())
+            .email(u.getEmail())
+            .password(u.getPassword())
+            .role(u.getRole())
+            .archived(u.isArchived())
+            .build();
     }
 }
