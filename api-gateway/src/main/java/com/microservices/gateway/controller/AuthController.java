@@ -28,7 +28,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     public AuthController(
-            @Qualifier("userWebClient") WebClient userWebClient,
+            @Qualifier("userWebClient") WebClient userWebClient, // Qualifier is needed because we have multiple WebClient beans and Spring needs to know which one to inject
             JwtUtil jwtUtil) {
         this.userWebClient = userWebClient;
         this.jwtUtil = jwtUtil;
@@ -36,6 +36,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public Mono<LoginResponse> login(@RequestBody LoginRequest request) {
+        // Call user service to verify credentials and get user details
         return userWebClient.post()
                 .uri("/users/verify")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -58,6 +59,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public Mono<LoginResponse> register(@RequestBody RegisterRequest request) {
+        // Call user service to create new user and get user details
         return userWebClient.post()
                 .uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -28,12 +28,12 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
         return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(ServerHttpSecurity.CsrfSpec::disable) // disable CSRF because we are using JWTs and not cookies
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable) // disable basic auth because we are using JWTs
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable) // do not auto generate login page
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // enable CORS with our custom configuration
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS).permitAll() // allow preflight CORS requests without authentication
                         .pathMatchers(
                                 "/auth/**",
                                 "/actuator/health",
@@ -52,10 +52,10 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("http://localhost:4200"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(true); // allow authorization headers (Bearer <token>) to be sent in CORS requests
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/**", config); // apply CORS configuration to all endpoints
         return source;
     }
 }

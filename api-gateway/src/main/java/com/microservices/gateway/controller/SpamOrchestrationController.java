@@ -1,5 +1,6 @@
 package com.microservices.gateway.controller;
 
+import com.microservices.gateway.dto.SpamFastApiRequest;
 import com.microservices.gateway.dto.SpamHistoryRequest;
 import com.microservices.gateway.dto.SpamPredictRequest;
 import com.microservices.gateway.dto.SpamPredictResponse;
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,19 +35,23 @@ public class SpamOrchestrationController {
 
     @PostMapping("/predict")
     public Mono<SpamPredictResponse> predict(@RequestBody SpamPredictRequest request) {
+        return callSpamService(request.text())
+                .doOnSuccess(result -> saveHistory(request, result));
+    }
+
+    private Mono<SpamPredictResponse> callSpamService(String text) {
         return spamWebClient.post()
                 .uri("/predict")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new SpamFastApiRequest(request.text()))
+                .bodyValue(new SpamFastApiRequest(text))
                 .retrieve()
-                .onStatus(s -> s.is5xxServerError(),
+                .onStatus(HttpStatusCode::is5xxServerError,
                         r -> Mono.error(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Spam service error")))
                 .bodyToMono(SpamPredictResponse.class)
                 .retryWhen(Retry.max(1)
                         .filter(SpamOrchestrationController::isRetryable)
                         .onRetryExhaustedThrow((spec, signal) ->
-                                new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Spam service unavailable")))
-                .doOnSuccess(result -> saveHistory(request, result));
+                                new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Spam service unavailable")));
     }
 
     private void saveHistory(SpamPredictRequest request, SpamPredictResponse result) {
@@ -64,13 +70,8 @@ public class SpamOrchestrationController {
     }
 
     private static boolean isRetryable(Throwable e) {
-        if (e instanceof WebClientResponseException ex) {
-            return ex.getStatusCode().is5xxServerError();
-        }
-        // connection errors, timeouts — always retry
+        // only retry on connection-level failures (no HTTP response received)
         return !(e instanceof WebClientResponseException);
     }
 
-    // Internal record matching FastAPI's expected field name
-    private record SpamFastApiRequest(String text) {}
 }

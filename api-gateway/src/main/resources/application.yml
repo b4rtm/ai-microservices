@@ -36,9 +36,10 @@ spring:
             - Path=/users/**
 
 jwt:
-  secret: ${JWT_SECRET:change-this-secret-key-for-production-min-32-chars!}
+  secret: abcddsdasdsaabcddsdasdsaabcddsdasdsaabcddsdasdsalwqiepowaskdl
   expiration: 86400000
 
+# configuration for actuator endpoints
 management:
   endpoints:
     web:

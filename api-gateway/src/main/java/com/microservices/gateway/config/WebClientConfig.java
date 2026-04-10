@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {
+    // Configuration for WebClient beans to interact with different microservices
 
     @Bean
     public WebClient spamWebClient(
