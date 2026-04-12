@@ -96,3 +96,66 @@ docker-compose logs -f spam-detection-service
 docker-compose logs -f api-gateway
 docker-compose logs -f frontend
 ```
+
+DIAGRAM (https://mermaid.live/edit)
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        Browser["🌐 Browser"]
+    end
+
+    subgraph "Frontend [:4200]"
+        Angular["Angular App\n"]
+    end
+
+    subgraph "API Gateway [:8080]"
+        GW["Spring Boot\nSpring Cloud Gateway"]
+        JWT["JWT Auth\nFilter"]
+        Orch["Spam Orchestration\nController"]
+        GW --> JWT
+        GW --> Orch
+    end
+
+    subgraph "Microservices"
+        SpamAPI["Spam Detection Service\n(FastAPI)\n:8000"]
+        SpamHistory["Spam History Service\n(Quarkus)\n:8082"]
+        UserSvc["User Service\n(Spring Boot)\n:8081"]
+    end
+
+    subgraph "Service Discovery"
+        Consul["Consul\n:8500"]
+    end
+
+    subgraph "Data Layer"
+        MySQL["MySQL Spam History\n:3306"]
+        MySQLUsers["MySQL Users\n:3307"]
+    end
+
+    Browser -->|"HTTP :4200"| Angular
+    Angular -->|"HTTP :8080"| GW
+
+    Orch -->|"POST /predict"| SpamAPI
+    Orch -->|"POST /user/add (async)"| SpamHistory
+    GW -->|"GET|POST /users/**"| UserSvc
+
+    GW -->|"register / health"| Consul
+    SpamAPI -->|"register / health"| Consul
+    SpamHistory -->|"register / health"| Consul
+    UserSvc -->|"register / health"| Consul
+
+    SpamHistory -->|"JDBC"| MySQL
+    UserSvc -->|"JDBC"| MySQLUsers
+
+    style Browser fill:#4A90D9,color:#fff
+    style Angular fill:#DD0031,color:#fff
+    style GW fill:#6DB33F,color:#fff
+    style JWT fill:#6DB33F,color:#fff
+    style Orch fill:#6DB33F,color:#fff
+    style SpamAPI fill:#009688,color:#fff
+    style SpamHistory fill:#E65C00,color:#fff
+    style UserSvc fill:#0DBB31,color:#fff
+    style Consul fill:#CA2171,color:#fff
+    style MySQL fill:#00758F,color:#fff
+    style MySQLUsers fill:#00758F,color:#fff
+
+```
