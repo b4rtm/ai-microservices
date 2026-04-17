@@ -37,7 +37,9 @@ public class SecurityConfig {
                         .pathMatchers(
                                 "/auth/**",
                                 "/actuator/health",
-                                "/spam/health"
+                                "/spam/health",
+                                "/spam/predict",
+                                "/users/users/health"
                         ).permitAll()
                         .pathMatchers("/admin/**", "/users/**").hasRole("ADMIN")
                         .anyExchange().authenticated()
