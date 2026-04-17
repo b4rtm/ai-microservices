@@ -21,8 +21,9 @@ import { ToastService } from '../../services/toast.service';
 export class HomeComponent implements OnInit {
   messageText = '';
   isSubmitting = false;
+  isAdmin = false;
   latestResult: SpamCheckResponse | null = null;
-  private readonly fallbackUserId = 1;
+  private userId: number | null = null;
   private readonly historyPageSize = 25;
   private historyPage = 0;
   hasMoreHistory = true;
@@ -37,6 +38,8 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.userId = this.resolveUserId();
+    this.isAdmin = this.resolveIsAdmin();
     this.loadHistory(true);
   }
 
@@ -85,10 +88,15 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    this.isLoadingHistory = true;
-    const userId = this.resolveUserId();
+    if (this.userId === null) {
+      this.hasMoreHistory = false;
+      this.toastService.error('Missing user session. Please sign in again.');
+      return;
+    }
 
-    this.historyService.getUserHistory(userId, this.historyPage, this.historyPageSize).subscribe({
+    this.isLoadingHistory = true;
+
+    this.historyService.getUserHistory(this.userId, this.historyPage, this.historyPageSize).subscribe({
       next: (response) => {
         const mapped = response.content
           .filter((item) => !item.isDeleted)
@@ -130,7 +138,7 @@ export class HomeComponent implements OnInit {
     return Math.max(0, Math.min(100, Math.round(normalized)));
   }
 
-  private resolveUserId(): number {
+  private resolveUserId(): number | null {
     const storedUserId = localStorage.getItem('userId');
     const parsed = Number(storedUserId);
 
@@ -138,6 +146,11 @@ export class HomeComponent implements OnInit {
       return parsed;
     }
 
-    return this.fallbackUserId;
+    return null;
+  }
+
+  private resolveIsAdmin(): boolean {
+    const role = (localStorage.getItem('role') ?? '').trim().toUpperCase();
+    return role === 'ADMIN';
   }
 }

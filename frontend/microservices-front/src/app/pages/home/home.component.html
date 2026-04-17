@@ -15,7 +15,12 @@
         <h1 class="display-6 fw-bold text-white mb-1">Spam Text Checker</h1>
         <p class="text-slate-300 mb-0">Paste any message and estimate if it looks like spam.</p>
       </div>
-      <a routerLink="/login" class="btn btn-outline-light rounded-3 px-4 py-2">Sign out</a>
+      <div class="d-flex gap-2 flex-wrap">
+        @if (isAdmin) {
+          <a routerLink="/admin" class="btn btn-outline-info rounded-3 px-4 py-2">Admin Panel</a>
+        }
+        <a routerLink="/login" class="btn btn-outline-light rounded-3 px-4 py-2">Sign out</a>
+      </div>
     </div>
 
     <div class="mb-3">

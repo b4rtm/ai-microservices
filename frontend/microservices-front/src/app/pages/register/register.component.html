@@ -12,14 +12,17 @@
           Set up your workspace to analyze suspicious text and reduce spam incidents.
         </p>
 
-        <form class="row g-3">
+        <form class="row g-3" (ngSubmit)="register()">
           <div class="col-12">
             <label for="registerEmail" class="form-label text-slate-200">Email</label>
             <input
               id="registerEmail"
+              name="email"
               type="email"
               class="form-control auth-input rounded-3 py-2"
               placeholder="analyst@spamshield.ai"
+              [(ngModel)]="email"
+              required
             />
           </div>
 
@@ -27,9 +30,12 @@
             <label for="registerPassword" class="form-label text-slate-200">Password</label>
             <input
               id="registerPassword"
+              name="password"
               type="password"
               class="form-control auth-input rounded-3 py-2"
               placeholder="Create password"
+              [(ngModel)]="password"
+              required
             />
           </div>
 
@@ -39,15 +45,22 @@
             >
             <input
               id="registerPasswordConfirm"
+              name="confirmPassword"
               type="password"
               class="form-control auth-input rounded-3 py-2"
               placeholder="Repeat password"
+              [(ngModel)]="confirmPassword"
+              required
             />
           </div>
 
           <div class="col-12 d-grid mt-2">
-            <button type="submit" class="btn btn-warning fw-semibold rounded-3 py-2">
-              Create Account
+            <button
+              type="submit"
+              class="btn btn-warning fw-semibold rounded-3 py-2"
+              [disabled]="isSubmitting"
+            >
+              {{ isSubmitting ? 'Creating Account...' : 'Create Account' }}
             </button>
           </div>
         </form>
