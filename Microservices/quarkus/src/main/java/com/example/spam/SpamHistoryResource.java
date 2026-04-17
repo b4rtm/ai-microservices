@@ -26,7 +26,7 @@ public class SpamHistoryResource {
     @Path("/add")
     public Response addRecord(SpamDTO dto) {
         var created = spamHistoryService.addRecord(dto);
-        return Response.status(Response.Status.CREATED).entity(created).build();
+        return Response.status(Response.Status.CREATED).header("X-Instance-ID", System.getenv("HOSTNAME")).entity(created).build();
     }
 
     @PATCH
@@ -34,7 +34,7 @@ public class SpamHistoryResource {
     public Response delete(@PathParam("id") Long id) {
         boolean deleted = spamHistoryService.deleteRecord(id);
         if (!deleted) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).header("X-Instance-ID", System.getenv("HOSTNAME")).build();
         }
 
         return Response.noContent().build();
