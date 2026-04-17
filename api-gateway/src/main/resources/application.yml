@@ -5,6 +5,12 @@ spring:
   application:
     name: api-gateway
   cloud:
+    loadbalancer:
+      ribbon:
+         enabled: false
+      config:
+        default:
+          hint: round_robin
     consul:
       host: ${CONSUL_HOST:localhost}
       port: ${CONSUL_PORT:8500}
@@ -13,27 +19,35 @@ spring:
         instance-id: api-gateway-1
         health-check-path: /actuator/health
         health-check-interval: 10s
-        prefer-ip-address: true
+        prefer-ip-address: false
     gateway:
+      discovery:
+        locator:
+          enabled: true
       routes:
-        # /spam/predict is handled by SpamOrchestrationController (orchestrates spam + history)
-        # /spam/health is still proxied directly
+        # SPAM DETECTION
         - id: spam-detection-service
-          uri: ${SPAM_SERVICE_URL:http://spam-detection-service:8000}
+          uri: lb://spam-detection-service
           predicates:
-            - Path=/spam/health
+            - Path=/spam/**
           filters:
             - StripPrefix=1
+
+        # SPAM HISTORY 
         - id: spam-history-service
-          uri: ${SPAM_HISTORY_SERVICE_URL:http://spam-history-service:8082}
+          uri: lb://spam-history-service
           predicates:
             - Path=/history/**
           filters:
             - StripPrefix=1
+
+        # USER SERVICE
         - id: user-service
-          uri: ${USER_SERVICE_URL:http://user-service:8081}
+          uri: lb://user-service
           predicates:
             - Path=/users/**
+          filters:
+            - StripPrefix=1
 
 jwt:
   secret: abcddsdasdsaabcddsdasdsaabcddsdasdsaabcddsdasdsalwqiepowaskdl
