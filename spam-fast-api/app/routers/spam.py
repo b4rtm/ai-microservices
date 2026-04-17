@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, HTTPException
 
 from app import ml
@@ -8,7 +10,8 @@ router = APIRouter()
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok"}
+    return {"status": "ok",
+            "id": os.getenv("HOSTNAME")}
 
 
 @router.post("/predict", response_model=PredictResponse)
@@ -28,4 +31,5 @@ def predict(request: PredictRequest) -> PredictResponse:
     return PredictResponse(
         category="spam" if predicted_label == "spam" else "not-spam",
         spam_probability=round(spam_prob, 4),
+        instance=os.getenv("HOSTNAME"),
     )
