@@ -5,9 +5,13 @@ import com.example.userservice.entity.User;
 import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -16,6 +20,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_USER = "USER";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -48,12 +55,40 @@ public class UserService {
             .toList();
     }
 
-    public void archiveUser(Long id) {
+    public Page<UserDto> getAllUsers(int page, int size, String email) {
+        Pageable pageable = PageRequest.of(page, size);
+        if (!StringUtils.hasText(email)) {
+            return userRepository.findAll(pageable).map(this::toDto);
+        }
+        return userRepository.findByEmailContainingIgnoreCase(email, pageable).map(this::toDto);
+    }
+
+    public void toggleArchiveUser(Long id) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        user.setArchived(true);
+        boolean archived = !user.isArchived();
+        user.setArchived(archived);
         userRepository.save(user);
-        log.info("Archived user id={}", id);
+        log.info("Updated archive status for user id={} archived={}", id, archived);
+    }
+
+    public void toggleUserRole(Long id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        String currentRole = user.getRole();
+        String nextRole;
+        if (ROLE_ADMIN.equalsIgnoreCase(currentRole)) {
+            nextRole = ROLE_USER;
+        } else if (ROLE_USER.equalsIgnoreCase(currentRole)) {
+            nextRole = ROLE_ADMIN;
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User role must be ADMIN or USER");
+        }
+
+        user.setRole(nextRole);
+        userRepository.save(user);
+        log.info("Updated role for user id={} role={}", id, nextRole);
     }
 
     public void deleteUser(Long id) {

@@ -20,7 +20,11 @@ export class MessageHistoryComponent {
   @Input({ required: true }) history: MessageHistoryItem[] = [];
   @Input() isLoading = false;
   @Input() hasMore = true;
+  @Input() title = 'Message history';
+  @Input() subtitle = 'Recent checks';
+  @Input() emptyMessage = 'No message history entries yet.';
   @Output() loadMore = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
   private readonly loadMoreThrottleMs = 350;
   private lastLoadMoreAt = 0;
 
@@ -32,6 +36,7 @@ export class MessageHistoryComponent {
 
   close(): void {
     this.isOpen = false;
+    this.closed.emit();
   }
 
   onScroll(event: Event): void {

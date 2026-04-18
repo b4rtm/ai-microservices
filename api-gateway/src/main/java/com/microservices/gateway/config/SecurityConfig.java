@@ -41,7 +41,10 @@ public class SecurityConfig {
                                 "/spam/predict",
                                 "/users/users/health"
                         ).permitAll()
-                        .pathMatchers("/admin/**", "/users/**").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.DELETE, "/users/users/*").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.PATCH, "/users/users/*/role", "/users/users/*/archive").hasRole("ADMIN")
+                        .pathMatchers(HttpMethod.GET, "/users/users/all").hasRole("ADMIN")
+                        .pathMatchers("/admin/**").hasRole("ADMIN")
                         .anyExchange().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), SecurityWebFiltersOrder.AUTHENTICATION)

@@ -6,6 +6,7 @@ import com.example.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,10 +40,26 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllActiveUsers());
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Page<UserDto>> getAllUsers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String email
+    ) {
+        return ResponseEntity.ok(userService.getAllUsers(page, size, email));
+    }
+
     @PatchMapping("/{id}/archive")
-    public ResponseEntity<Void> archiveUser(@PathVariable Long id) {
+    public ResponseEntity<Void> toggleArchiveUser(@PathVariable Long id) {
         log.info("PATCH /users/{}/archive", id);
-        userService.archiveUser(id);
+        userService.toggleArchiveUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<Void> toggleUserRole(@PathVariable Long id) {
+        log.info("PATCH /users/{}/role", id);
+        userService.toggleUserRole(id);
         return ResponseEntity.noContent().build();
     }
 
