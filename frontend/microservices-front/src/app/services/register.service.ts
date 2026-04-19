@@ -12,6 +12,7 @@ export class RegisterService {
   constructor(private readonly http: HttpClient) {}
 
   register(payload: RegisterRequest): Observable<LoginResponse> {
+    localStorage.clear();
     return this.http
       .post<LoginResponse>(this.registerUrl, payload)
       .pipe(tap((response) => this.saveAuthData(response)));
