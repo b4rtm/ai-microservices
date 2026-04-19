@@ -38,6 +38,7 @@ pnpm-debug.log*
 
 # ── ML model (large binary, reproducible via train) ───────────────────────────
 spam-fast-api/app/model/
+spam-fast-api/models/
 
 # ── IDEs ──────────────────────────────────────────────────────────────────────
 .idea/

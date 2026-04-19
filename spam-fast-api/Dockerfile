@@ -8,10 +8,15 @@ WORKDIR /app
 # Copy dependency files first for better layer caching
 COPY pyproject.toml uv.lock ./
 
-# Install dependencies (no dev, no editable, frozen lockfile)
-RUN uv sync --frozen --no-dev --no-editable
+# Install dependencies — BuildKit cache avoids re-downloading packages on every dep change
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-editable
 
-# Copy application code and dataset
+# Copy model weights as a separate layer — only re-transferred when the model itself changes,
+# not on every Python code edit (~870 MB saved per code-only rebuild)
+COPY models/ ./models/
+
+# Copy application code and dataset (small files, changes frequently)
 COPY app/ ./app/
 COPY data/ ./data/
 

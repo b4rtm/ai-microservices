@@ -2,6 +2,7 @@ import os
 import pathlib
 
 MODEL_PATH = pathlib.Path(__file__).parent / "model" / "spam_model.joblib"
+BERT_MODEL_DIR = pathlib.Path(__file__).parent.parent / "models" / "distilbert_spam_model"
 
 CONSUL_HOST = os.getenv("CONSUL_HOST", "localhost")
 CONSUL_PORT = os.getenv("CONSUL_PORT", "8500")

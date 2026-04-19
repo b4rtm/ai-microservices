@@ -4,4 +4,5 @@
 __pycache__/
 *.pyc
 *.pyo
-app/model/
+app/model/spam_model.joblib
+models/distilbert_spam_model/checkpoints/

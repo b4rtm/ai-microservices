@@ -10,10 +10,12 @@ from app.routers import spam
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     ml.load_model()
+    ml.load_bert_model()
     await consul.register()
     yield # App is running
     # Cleanup on shutdown
     await consul.deregister()
+    ml.unload_bert_model()
     ml.unload_model()
 
 
