@@ -10,6 +10,7 @@ import { SpamCheckResponse, SpamDTO } from '../../Interfaces/SpamInterfaces';
 import { HistoryService } from '../../services/history.service';
 import { finalize } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
+import { LoginService } from '../../services/login.service';
 
 @Component({
   selector: 'app-home',
@@ -35,6 +36,7 @@ export class HomeComponent implements OnInit {
     private readonly homeService: HomeService,
     private readonly historyService: HistoryService,
     private readonly toastService: ToastService,
+    private readonly loginService: LoginService,
   ) {}
 
   ngOnInit(): void {
@@ -152,5 +154,9 @@ export class HomeComponent implements OnInit {
   private resolveIsAdmin(): boolean {
     const role = (localStorage.getItem('role') ?? '').trim().toUpperCase();
     return role === 'ADMIN';
+  }
+
+  onSignOut() {
+    this.loginService.logout();
   }
 }

@@ -19,7 +19,7 @@
         @if (isAdmin) {
           <a routerLink="/admin" class="btn btn-outline-info rounded-3 px-4 py-2">Admin Panel</a>
         }
-        <a routerLink="/login" class="btn btn-outline-light rounded-3 px-4 py-2">Sign out</a>
+        <a routerLink="/login" class="btn btn-outline-light rounded-3 px-4 py-2" (click)="onSignOut()">Sign out</a>
       </div>
     </div>
 

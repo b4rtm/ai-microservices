@@ -12,9 +12,14 @@ export class LoginService {
   constructor(private readonly http: HttpClient) {}
 
   login(payload: LoginRequest): Observable<LoginResponse> {
+    localStorage.clear();
     return this.http
       .post<LoginResponse>(this.loginUrl, payload)
       .pipe(tap((response) => this.saveAuthData(response)));
+  }
+
+  logout() {
+    localStorage.clear();
   }
 
   private saveAuthData(response: LoginResponse): void {
