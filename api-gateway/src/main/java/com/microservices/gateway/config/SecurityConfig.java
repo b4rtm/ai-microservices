@@ -51,13 +51,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        // allowedOriginPatterns supports wildcards and is compatible with allowCredentials(true).
+        // chrome-extension://* lets the browser extension call public endpoints from the service worker.
+        config.setAllowedOriginPatterns(List.of("http://localhost:4200", "chrome-extension://*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // allow authorization headers (Bearer <token>) to be sent in CORS requests
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config); // apply CORS configuration to all endpoints
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
