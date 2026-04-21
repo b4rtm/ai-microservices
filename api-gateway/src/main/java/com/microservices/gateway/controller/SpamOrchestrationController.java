@@ -42,13 +42,21 @@ public class SpamOrchestrationController {
     public Mono<SpamPredictResponse> predict(
             @RequestBody SpamPredictRequest request,
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
-        return callSpamService(request.text())
+        return callSpamService(request.text(), "/predict")
                 .doOnSuccess(result -> saveHistory(request, result, authHeader));
     }
 
-    private Mono<SpamPredictResponse> callSpamService(String text) {
+    @PostMapping("/predict-bert")
+    public Mono<SpamPredictResponse> predictBert(
+            @RequestBody SpamPredictRequest request,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authHeader) {
+        return callSpamService(request.text(), "/predict-bert")
+                .doOnSuccess(result -> saveHistory(request, result, authHeader));
+    }
+
+    private Mono<SpamPredictResponse> callSpamService(String text, String uri) {
         return spamWebClient.post()
-                .uri("/predict")
+                .uri(uri)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(new SpamFastApiRequest(text))
                 .retrieve()
