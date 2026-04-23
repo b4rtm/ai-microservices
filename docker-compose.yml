@@ -24,15 +24,29 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     networks:
       - microservices-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  phpmyadmin:
-    image: phpmyadmin:latest
-    environment:
-      PMA_HOST: mysql
-      PMA_USER: root
-      PMA_PASSWORD: root
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
     ports:
-      - "8085:80"
+      - "16686:16686"
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    networks:
+      - microservices-net
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
     networks:
       - microservices-net
 
@@ -47,11 +61,16 @@ services:
       QUARKUS_DATASOURCE_PASSWORD: password
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
+      QUARKUS_OTEL_ENABLED: "true"
+      QUARKUS_OTEL_TRACES_EXPORTER: otlp
+      QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      QUARKUS_OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      QUARKUS_OTEL_TRACES_SAMPLER: always_on
     networks:
       - microservices-net
     depends_on:
-      - mysql
-      - consul
+      mysql:
+        condition: service_healthy
     deploy:
       replicas: 1
       restart_policy:
