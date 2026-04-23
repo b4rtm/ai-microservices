@@ -48,6 +48,10 @@
   background: linear-gradient(135deg, #f59e0b, #b45309);
 }
 
+#spamshield-card .ss-header--info {
+  background: linear-gradient(135deg, #0ea5e9, #0369a1);
+}
+
 #spamshield-card .ss-title {
   font-weight: 600;
   font-size: 13px;
@@ -122,4 +126,61 @@
   color: #fcd34d;
   font-size: 13px;
   word-break: break-word;
+}
+
+#spamshield-card .ss-info-msg {
+  color: #e2e8f0;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+#spamshield-card .ss-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#spamshield-card .ss-form-label {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+#spamshield-card .ss-input {
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #f1f5f9;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+#spamshield-card .ss-input:focus {
+  outline: 2px solid #38bdf8;
+  outline-offset: 1px;
+}
+
+#spamshield-card .ss-button {
+  margin-top: 4px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+#spamshield-card .ss-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#spamshield-card .ss-form-status {
+  min-height: 18px;
+  color: #93c5fd;
+  font-size: 12px;
+}
+
+#spamshield-card .ss-form-status--error {
+  color: #fca5a5;
 }
