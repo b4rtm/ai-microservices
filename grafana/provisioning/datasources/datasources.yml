@@ -7,3 +7,7 @@ datasources:
     url: http://tempo:3200
     isDefault: true
     editable: true
+    jsonData:
+      spanBar:
+        type: Tag
+        tag: service.instance.id

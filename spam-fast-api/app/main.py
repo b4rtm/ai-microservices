@@ -41,9 +41,10 @@ def setup_tracing():
     if isinstance(trace.get_tracer_provider(), TracerProvider):
         return
 
+    hostname = os.getenv("HOSTNAME", "local-dev")
     resource = Resource.create({
         "service.name": SERVICE_NAME,
-        "service.instance.id": os.getenv("HOSTNAME", "local-dev"),
+        "service.instance.id": f"{SERVICE_NAME}-{hostname}",
         "deployment.environment": "docker-compose",
     })
 

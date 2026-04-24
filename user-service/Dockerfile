@@ -11,4 +11,4 @@ FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
 COPY --from=builder /build/target/*.jar app.jar
 EXPOSE 8081
-ENTRYPOINT ["sh", "-c", "export OTEL_RESOURCE_ATTRIBUTES=service.instance.id=${HOSTNAME},deployment.environment=docker-compose && exec java -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "export OTEL_RESOURCE_ATTRIBUTES=service.instance.id=${OTEL_SERVICE_NAME:-user-service}-${HOSTNAME},deployment.environment=docker-compose && exec java -jar app.jar"]

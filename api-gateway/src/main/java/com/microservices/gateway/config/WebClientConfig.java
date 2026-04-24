@@ -1,6 +1,8 @@
 package com.microservices.gateway.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
@@ -11,23 +13,28 @@ public class WebClientConfig {
     // Configuration for WebClient beans to interact with different microservices
 
     @Bean
+    @LoadBalanced
+    public Builder loadBalancedWebClientBuilder(ObjectProvider<WebClientCustomizer> customizerProvider) {
+        Builder builder = WebClient.builder();
+        customizerProvider.orderedStream().forEach(customizer -> customizer.customize(builder));
+        return builder;
+    }
+
+    @Bean
     public WebClient spamWebClient(
-            Builder webClientBuilder,
-            @Value("${SPAM_SERVICE_URL:http://spam-detection-service:8000}") String spamUrl) {
-        return webClientBuilder.baseUrl(spamUrl).build();
+            @LoadBalanced Builder webClientBuilder) {
+        return webClientBuilder.baseUrl("http://spam-detection-service").build();
     }
 
     @Bean
     public WebClient historyWebClient(
-            Builder webClientBuilder,
-            @Value("${SPAM_HISTORY_SERVICE_URL:http://spam-history-service:8082}") String historyUrl) {
-        return webClientBuilder.baseUrl(historyUrl).build();
+            @LoadBalanced Builder webClientBuilder) {
+        return webClientBuilder.baseUrl("http://spam-history-service").build();
     }
 
     @Bean
     public WebClient userWebClient(
-            Builder webClientBuilder,
-            @Value("${USER_SERVICE_URL:http://user-service:8081}") String userUrl) {
-        return webClientBuilder.baseUrl(userUrl).build();
+            @LoadBalanced Builder webClientBuilder) {
+        return webClientBuilder.baseUrl("http://user-service").build();
     }
 }

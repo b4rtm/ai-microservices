@@ -17,4 +17,4 @@ WORKDIR /app
 COPY --from=build /app/target/quarkus-app/ /app/
 
 EXPOSE 8082
-CMD ["sh", "-c", "java -Dotel.service.name=${OTEL_SERVICE_NAME:-spam-history-service} -Dotel.resource.attributes=service.instance.id=${HOSTNAME},deployment.environment=docker-compose -jar quarkus-run.jar"]
+CMD ["sh", "-c", "java -Dotel.service.name=${OTEL_SERVICE_NAME:-spam-history-service} -Dotel.resource.attributes=service.instance.id=${OTEL_SERVICE_NAME:-spam-history-service}-${HOSTNAME},deployment.environment=docker-compose -jar quarkus-run.jar"]
