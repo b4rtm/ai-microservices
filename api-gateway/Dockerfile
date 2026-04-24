@@ -22,4 +22,4 @@ COPY --from=builder /build/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "export OTEL_RESOURCE_ATTRIBUTES=service.instance.id=${OTEL_SERVICE_NAME:-api-gateway}-${HOSTNAME},deployment.environment=docker-compose && exec java -jar app.jar"]
