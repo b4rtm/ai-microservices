@@ -99,6 +99,8 @@ services:
     image: spam-detection-service:latest
     expose:
       - "8000"
+    volumes:
+      - ./spam-fast-api/models:/app/models:ro
     environment:
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
