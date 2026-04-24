@@ -4,12 +4,18 @@ from fastapi import APIRouter, HTTPException
 from app import ml
 from app.schemas import PredictRequest, PredictResponse
 
+from opentelemetry import trace
+
 router = APIRouter()
 
 
 @router.get("/health")
 def health() -> dict:
-    return {"status": "ok"}
+    tracer = trace.get_tracer("debug")
+
+    with tracer.start_as_current_span("health-test-span"):
+        print("SPAN CREATED")
+        return {"status": "healthy"}
 
 
 @router.post("/predict", response_model=PredictResponse)

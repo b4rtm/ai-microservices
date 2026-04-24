@@ -12,10 +12,6 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-editable
 
-# Copy model weights as a separate layer — only re-transferred when the model itself changes,
-# not on every Python code edit (~870 MB saved per code-only rebuild)
-COPY models/ ./models/
-
 # Copy application code and dataset (small files, changes frequently)
 COPY app/ ./app/
 COPY data/ ./data/

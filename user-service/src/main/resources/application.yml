@@ -11,7 +11,7 @@ spring:
       port: ${CONSUL_PORT:8500}
       discovery:
         service-name: user-service
-        instance-id: ${spring.application.name}-${HOSTNAME}  # 🔥 FIX
+        instance-id: ${spring.application.name}-${HOSTNAME:${random.uuid}}
         health-check-path: /actuator/health
         health-check-interval: 10s
         prefer-ip-address: true
@@ -38,3 +38,22 @@ management:
     web:
       exposure:
         include: health,info
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+      transport: ${OTEL_EXPORTER_OTLP_PROTOCOL:grpc}
+
+tracing:
+  url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+
+logging:
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}] "
+  include-application-name: false
+  level:
+    root: INFO
+    com.example.userservice: DEBUG

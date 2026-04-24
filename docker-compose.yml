@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   consul:
     image: consul:1.15
@@ -30,23 +28,39 @@ services:
       timeout: 5s
       retries: 10
 
-  jaeger:
-    image: jaegertracing/all-in-one:1.57
+  tempo:
+    image: grafana/tempo:2.10.4
+    command: ["-config.file=/etc/tempo.yaml"]
     ports:
-      - "16686:16686"
-    environment:
-      COLLECTOR_OTLP_ENABLED: "true"
+      - "3200:3200"
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
     networks:
       - microservices-net
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/otel-collector-config.yaml"]
-    ports:
-      - "4317:4317"
-      - "4318:4318"
+    ports: []
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    networks:
+      - microservices-net
+    depends_on:
+      - tempo
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - tempo
     networks:
       - microservices-net
 
@@ -61,16 +75,18 @@ services:
       QUARKUS_DATASOURCE_PASSWORD: password
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
-      QUARKUS_OTEL_ENABLED: "true"
-      QUARKUS_OTEL_TRACES_EXPORTER: otlp
-      QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      QUARKUS_OTEL_EXPORTER_OTLP_PROTOCOL: grpc
-      QUARKUS_OTEL_TRACES_SAMPLER: always_on
+      OTEL_SERVICE_NAME: spam-history-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     networks:
       - microservices-net
     depends_on:
+      consul:
+        condition: service_started
       mysql:
         condition: service_healthy
+      otel-collector:
+        condition: service_started
     deploy:
       replicas: 1
       restart_policy:
@@ -86,10 +102,15 @@ services:
     environment:
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
+      OTEL_SERVICE_NAME: spam-detection-service
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     networks:
       - microservices-net
     depends_on:
       - consul
+      - otel-collector
     deploy:
       replicas: 1
       restart_policy:
@@ -109,6 +130,10 @@ services:
       CONSUL_PORT: 8500
       USER_SERVICE_URL: http://user-service:8081
       JWT_SECRET: sakldjasjfldkjgaosdifjdnasldkjaslkdjaslkdjfdsfuoasilkjdm
+      OTEL_SERVICE_NAME: api-gateway
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     networks:
       - microservices-net
     depends_on:
@@ -116,6 +141,7 @@ services:
       - consul
       - user-service
       - spam-history-service
+      - otel-collector
 
   mysql-users:
     image: mysql:8.0
@@ -144,11 +170,16 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
       CONSUL_HOST: consul
       CONSUL_PORT: 8500
+      OTEL_SERVICE_NAME: user-service
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     networks:
       - microservices-net
     depends_on:
       - mysql-users
       - consul
+      - otel-collector
     deploy:
       replicas: 1
       restart_policy:
@@ -172,3 +203,4 @@ networks:
 volumes:
   mysql_users_data:
   mysql_data:
+  grafana_data:
