@@ -349,13 +349,27 @@ export class AdminPanel2Component implements OnInit, OnDestroy {
   }
 
   private mapToHistoryItem(item: SpamDTO): MessageHistoryItem {
+    const confidence = this.toPercent(item.prediction);
+
     return {
       id: item.id,
       preview: item.text,
-      status: item.category === 'spam' ? 'spam' : 'safe',
-      confidence: this.toPercent(item.prediction),
+      status: this.getStatusByPercent(confidence),
+      confidence,
       checkedAt: `Entry #${item.id}`,
     };
+  }
+
+  private getStatusByPercent(percent: number): MessageHistoryItem['status'] {
+    if (percent <= 50) {
+      return 'safe';
+    }
+
+    if (percent <= 75) {
+      return 'probably-spam';
+    }
+
+    return 'spam';
   }
 
   private toPercent(value: number): number {

@@ -122,7 +122,6 @@ async function handleSpamCheck(info, tab) {
     const data = await response.json();
     sendToTab(tab.id, {
       type: "SPAM_RESULT",
-      category: data.category,
       probability: data.spam_probability,
     });
   } catch (err) {

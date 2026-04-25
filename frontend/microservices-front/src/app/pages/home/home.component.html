@@ -2,6 +2,7 @@
   [history]="messageHistory"
   [isLoading]="isLoadingHistory"
   [hasMore]="hasMoreHistory"
+  (opened)="onHistoryButtonClick()"
   (loadMore)="onHistoryScrollEnd()"
 />
 
@@ -44,6 +45,14 @@
       >
         {{ isSubmitting ? 'Checking...' : 'Check for spam' }}
       </button>
+      <button
+        type="button"
+        class="btn btn-outline-warning fw-semibold rounded-3 px-4"
+        (click)="checkForSpam(true)"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? 'Checking...' : 'Check for spam (BERT)' }}
+      </button>
     </div>
 
     <div class="result-card rounded-3 p-3 p-md-4">
@@ -51,10 +60,11 @@
       @if (latestResult) {
         <h2
           class="h5 fw-semibold mb-2"
-          [class.result-spam]="latestResult.category === 'spam'"
-          [class.result-safe]="latestResult.category !== 'spam'"
+          [class.result-spam]="getLatestResultStatus() === 'spam'"
+          [class.result-probably]="getLatestResultStatus() === 'probably-spam'"
+          [class.result-safe]="getLatestResultStatus() === 'safe'"
         >
-          {{ latestResult.category === 'spam' ? 'Spam detected' : 'Looks safe' }}
+          {{ getLatestResultLabel() }}
         </h2>
         <p class="mb-0 text-slate-300">
           Spam probability: <strong>{{ (latestResult.spam_probability * 100).toFixed(1) }}%</strong>
@@ -62,7 +72,7 @@
       } @else {
         <h2 class="h5 fw-semibold mb-2 text-white">No analysis yet</h2>
         <p class="mb-0 text-slate-300">
-          Submit a message to see prediction category and spam probability.
+          Submit a message to see threshold-based spam status and probability.
         </p>
       }
     </div>

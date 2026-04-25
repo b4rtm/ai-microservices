@@ -44,6 +44,10 @@
   background: linear-gradient(135deg, #22c55e, #15803d);
 }
 
+#spamshield-card .ss-header--probably {
+  background: linear-gradient(135deg, #f59e0b, #b45309);
+}
+
 #spamshield-card .ss-header--error {
   background: linear-gradient(135deg, #f59e0b, #b45309);
 }
@@ -118,6 +122,10 @@
 
 #spamshield-card .ss-bar-fill--safe {
   background: linear-gradient(90deg, #22c55e, #15803d);
+}
+
+#spamshield-card .ss-bar-fill--probably {
+  background: linear-gradient(90deg, #f59e0b, #b45309);
 }
 
 /* ── Error message ───────────────────────────────────────────── */

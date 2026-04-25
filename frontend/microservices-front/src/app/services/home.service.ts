@@ -14,4 +14,8 @@ export class HomeService {
   predictSpam(payload: SpamCheckRequest): Observable<SpamCheckResponse> {
     return this.http.post<SpamCheckResponse>(`${this.baseUrl}/spam/predict`, payload);
   }
+
+  predictSpamBert(payload: SpamCheckRequest): Observable<SpamCheckResponse> {
+    return this.http.post<SpamCheckResponse>(`${this.baseUrl}/spam/predict-bert`, payload);
+  }
 }

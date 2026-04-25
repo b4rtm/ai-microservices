@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import {
   MessageHistoryComponent,
   MessageHistoryItem,
+  MessageStatus,
 } from '../../components/message-history/message-history.component';
 import { HomeService } from '../../services/home.service';
 import { SpamCheckResponse, SpamDTO } from '../../Interfaces/SpamInterfaces';
@@ -45,7 +46,7 @@ export class HomeComponent implements OnInit {
     this.loadHistory(true);
   }
 
-  checkForSpam(): void {
+  checkForSpam(useBertModel = false): void {
     const text = this.messageText.trim();
 
     if (!text) {
@@ -55,8 +56,11 @@ export class HomeComponent implements OnInit {
 
     this.isSubmitting = true;
 
-    this.homeService
-      .predictSpam({ text })
+    const predictionRequest = useBertModel
+      ? this.homeService.predictSpamBert({ text })
+      : this.homeService.predictSpam({ text });
+
+    predictionRequest
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (response) => {
@@ -73,6 +77,32 @@ export class HomeComponent implements OnInit {
 
   onHistoryScrollEnd(): void {
     this.loadHistory();
+  }
+
+  onHistoryButtonClick(): void {
+    this.loadHistory(true);
+  }
+
+  getLatestResultStatus(): MessageStatus | null {
+    if (!this.latestResult) {
+      return null;
+    }
+
+    return this.getStatusByPercent(this.toPercent(this.latestResult.spam_probability));
+  }
+
+  getLatestResultLabel(): string {
+    const status = this.getLatestResultStatus();
+
+    if (status === 'spam') {
+      return 'Spam detected';
+    }
+
+    if (status === 'probably-spam') {
+      return 'Probably spam';
+    }
+
+    return 'Looks safe';
   }
 
   private loadHistory(reset = false): void {
@@ -126,13 +156,27 @@ export class HomeComponent implements OnInit {
   }
 
   private mapToHistoryItem(item: SpamDTO): MessageHistoryItem {
+    const confidence = this.toPercent(item.prediction);
+
     return {
       id: item.id,
       preview: item.text.slice(0, 110),
-      status: item.category === 'spam' ? 'spam' : 'safe',
-      confidence: this.toPercent(item.prediction),
+      status: this.getStatusByPercent(confidence),
+      confidence,
       checkedAt: `Entry #${item.id}`,
     };
+  }
+
+  private getStatusByPercent(percent: number): MessageStatus {
+    if (percent <= 50) {
+      return 'safe';
+    }
+
+    if (percent <= 75) {
+      return 'probably-spam';
+    }
+
+    return 'spam';
   }
 
   private toPercent(value: number): number {

@@ -36,11 +36,11 @@
           <span
             class="history-badge"
             [class.history-badge--spam]="item.status === 'spam'"
+            [class.history-badge--probably]="item.status === 'probably-spam'"
             [class.history-badge--safe]="item.status === 'safe'"
           >
-            {{ item.status === 'spam' ? 'Spam' : 'Not spam' }}
+            {{ getStatusLabel(item.status) }}
           </span>
-          <small class="text-slate-300">{{ item.checkedAt }}</small>
         </div>
         <p class="mb-1 history-preview">{{ item.preview }}</p>
         <small class="text-slate-300">Confidence: {{ item.confidence }}%</small>

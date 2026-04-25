@@ -85,12 +85,39 @@
     card.style.top = `${y}px`;
   }
 
-  function showCard({ category, probability }) {
+  function getSpamPresentation(probability) {
+    if (probability >= 0.75) {
+      return {
+        tone: "spam",
+        title: "⚠ Spam",
+      };
+    }
+
+    if (probability >= 0.5) {
+      return {
+        tone: "probably",
+        title: "? Probably Spam",
+      };
+    }
+
+    return {
+      tone: "safe",
+      title: "✓ Not Spam",
+    };
+  }
+
+  function showCard({ probability }) {
     removeCard();
     updateAnchorFromSelection();
 
-    const isSpam = category === "spam";
-    const percent = (probability * 100).toFixed(1);
+    const probabilityNumber = Number(probability);
+    if (!Number.isFinite(probabilityNumber)) {
+      showError("Invalid prediction response from server.");
+      return;
+    }
+
+    const { tone, title } = getSpamPresentation(probabilityNumber);
+    const percent = (probabilityNumber * 100).toFixed(1);
 
     const card = document.createElement("div");
     card.id = CARD_ID;
@@ -98,15 +125,15 @@
     card.setAttribute("aria-live", "polite");
 
     card.innerHTML = `
-      <div class="ss-header ss-header--${isSpam ? "spam" : "safe"}">
-        <span class="ss-title">${isSpam ? "⚠ Spam Detected" : "✓ Not Spam"}</span>
+      <div class="ss-header ss-header--${tone}">
+        <span class="ss-title">${title}</span>
         <button class="ss-close" aria-label="Dismiss">&times;</button>
       </div>
       <div class="ss-body">
         <div class="ss-label">Spam probability</div>
         <div class="ss-percent">${percent}%</div>
         <div class="ss-bar-track">
-          <div class="ss-bar-fill ss-bar-fill--${isSpam ? "spam" : "safe"}" style="width: ${percent}%"></div>
+          <div class="ss-bar-fill ss-bar-fill--${tone}" style="width: ${percent}%"></div>
         </div>
       </div>
     `;

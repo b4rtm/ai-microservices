@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-export type MessageStatus = 'spam' | 'safe';
+export type MessageStatus = 'spam' | 'probably-spam' | 'safe';
 
 export interface MessageHistoryItem {
   id: number;
@@ -24,14 +24,28 @@ export class MessageHistoryComponent {
   @Input() subtitle = 'Recent checks';
   @Input() emptyMessage = 'No message history entries yet.';
   @Output() loadMore = new EventEmitter<void>();
+  @Output() opened = new EventEmitter<void>();
   @Output() closed = new EventEmitter<void>();
   private readonly loadMoreThrottleMs = 350;
   private lastLoadMoreAt = 0;
 
   isOpen = false;
 
+  getStatusLabel(status: MessageStatus): string {
+    if (status === 'spam') {
+      return 'Spam';
+    }
+
+    if (status === 'probably-spam') {
+      return 'Probably spam';
+    }
+
+    return 'Not spam';
+  }
+
   open(): void {
     this.isOpen = true;
+    this.opened.emit();
   }
 
   close(): void {
